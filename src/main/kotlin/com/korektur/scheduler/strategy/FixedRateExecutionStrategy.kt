@@ -1,14 +1,23 @@
 package com.korektur.scheduler.strategy
 
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeUnit.MILLISECONDS
+import java.time.Instant
+import java.time.temporal.ChronoUnit.MILLIS
+import java.time.temporal.TemporalUnit
 
-class FixedRateExecutionStrategy(val rate: Long,
-                                 val timeUnit: TimeUnit = MILLISECONDS,
-                                 val initialDelay: Long = 0L,
-                                 val initialDelayTimeUnit: TimeUnit = MILLISECONDS) : BaseExecutionStrategy {
+/**
+ * Strategy that calculates next execution time based on fixed delay since start of the last execution.
+ * @param rate fixed period between the start of the last invocation and the start of the next.
+ * @param timeUnit time unit for the rate
+ * @param initialDelay Number of milliseconds to wait before the first execution after task was registered
+ * @param initialDelayTimeUnit time unit for the initial delay
+ */
+class FixedRateExecutionStrategy(private val rate: Long,
+                                 private val timeUnit: TemporalUnit = MILLIS,
+                                 initialDelay: Long = 0L,
+                                 initialDelayTimeUnit: TemporalUnit = MILLIS) : BaseExecutionStrategy(initialDelay, initialDelayTimeUnit) {
 
-    override fun timeToNextExecution(): Long? {
-        TODO("not implemented")
+    override fun beforeExecution(currentTime: Instant) {
+        lastExecutionTime = currentTime
+        nextExecutionExpectedTime = currentTime.plus(rate, timeUnit)
     }
 }
