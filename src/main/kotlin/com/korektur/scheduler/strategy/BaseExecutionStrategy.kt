@@ -21,6 +21,10 @@ abstract class BaseExecutionStrategy(private val initialDelay: Long = 0L,
     @Volatile
     private var registered = false
 
+    /**
+     * Registers strategy for execution.
+     * Should be when registering task for execution.
+     */
     public fun register(currentTime: Instant) {
         if (!registered) {
             synchronized(this) {
@@ -58,6 +62,6 @@ abstract class BaseExecutionStrategy(private val initialDelay: Long = 0L,
             return null
         }
 
-        return Duration.between(nextExecutionExpectedTime, currentTime).abs().toMillis()
+        return max(Duration.between(currentTime, nextExecutionExpectedTime).toMillis(), 0)
     }
 }
