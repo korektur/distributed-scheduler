@@ -7,11 +7,11 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit.MILLIS
 import java.time.temporal.TemporalUnit
 
-abstract class BaseExecutionStrategy(private val initialDelay: Long = 0L,
-                                     private val initialDelayTimeUnit: TemporalUnit = MILLIS) {
+abstract class BaseSchedulingStrategy(private val initialDelay: Long = 0L,
+                                      private val initialDelayTimeUnit: TemporalUnit = MILLIS): SchedulingStrategy {
 
     companion object {
-        private val LOG = LoggerFactory.getLogger(BaseExecutionStrategy::class.java)
+        private val LOG = LoggerFactory.getLogger(BaseSchedulingStrategy::class.java)
     }
 
     @Volatile
@@ -21,11 +21,7 @@ abstract class BaseExecutionStrategy(private val initialDelay: Long = 0L,
     @Volatile
     private var registered = false
 
-    /**
-     * Registers strategy for execution.
-     * Should be when registering task for execution.
-     */
-    public fun register(currentTime: Instant) {
+    public override fun register(currentTime: Instant) {
         if (!registered) {
             synchronized(this) {
                 if (!registered) {
@@ -36,25 +32,7 @@ abstract class BaseExecutionStrategy(private val initialDelay: Long = 0L,
         }
     }
 
-    /**
-     * This method is called before task is executed
-     */
-    public open fun beforeExecution(currentTime: Instant) {
-        //do nothing
-    }
-
-    /**
-     * This method is called after task is executed
-     */
-    public open fun afterExecution(currentTime: Instant) {
-        //do nothing
-    }
-
-    /**
-     * @param currentTime current time
-     * @return time left until next execution in milliseconds, null if strategy wasn't registered
-     */
-    public fun timeTillNextExecution(currentTime: Instant): Long? {
+    public override fun timeTillNextExecution(currentTime: Instant): Long? {
         if (!registered) {
             if (LOG.isDebugEnabled) {
                 LOG.debug("timeTillInitialDelayPassed check called on unregistered strategy")

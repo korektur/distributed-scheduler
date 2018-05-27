@@ -1,3 +1,0 @@
-package com.korektur.scheduler.task
-
-internal class SharedScheduledTaskBuilderTest

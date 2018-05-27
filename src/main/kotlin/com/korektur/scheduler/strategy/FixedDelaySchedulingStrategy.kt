@@ -11,10 +11,10 @@ import java.time.temporal.TemporalUnit
  * @param initialDelay Number of milliseconds to wait before the first execution after task was registered
  * @param initialDelayTimeUnit time unit for the initial delay
  */
-class FixedDelayExecutionStrategy(private val delay: Long,
-                                  private val timeUnit: TemporalUnit = MILLIS,
-                                  initialDelay: Long = 0L,
-                                  initialDelayTimeUnit: TemporalUnit = MILLIS) : BaseExecutionStrategy(initialDelay, initialDelayTimeUnit) {
+class FixedDelaySchedulingStrategy(private val delay: Long,
+                                   private val timeUnit: TemporalUnit = MILLIS,
+                                   initialDelay: Long = 0L,
+                                   initialDelayTimeUnit: TemporalUnit = MILLIS) : BaseSchedulingStrategy(initialDelay, initialDelayTimeUnit) {
 
     override fun afterExecution(currentTime: Instant) {
         lastExecutionTime = currentTime

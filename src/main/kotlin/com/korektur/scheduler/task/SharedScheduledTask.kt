@@ -1,6 +1,14 @@
 package com.korektur.scheduler.task
 
-import java.util.concurrent.Callable
+import com.korektur.scheduler.strategy.SchedulingStrategy
+import java.util.concurrent.ConcurrentHashMap
 
-data class SharedScheduledTask internal constructor(val task: Callable<Any>,
-                                                    val context: Map<String, Any>)
+public abstract class SharedScheduledTask(
+        private val strategy: SchedulingStrategy,
+        private val context: Map<String, Any> = ConcurrentHashMap()) {
+
+
+
+    public abstract fun execute(): TaskExecutionResult
+
+}

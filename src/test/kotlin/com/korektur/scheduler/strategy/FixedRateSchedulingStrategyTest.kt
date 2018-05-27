@@ -6,17 +6,17 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 
-class FixedRateExecutionStrategyTest {
+class FixedRateSchedulingStrategyTest {
 
     @Test
     fun testTimeTillNextExecutionNotRegistered() {
-        val strategy = FixedRateExecutionStrategy(10000)
+        val strategy = FixedRateSchedulingStrategy(10000)
         Assertions.assertNull(strategy.timeTillNextExecution(Instant.now()))
     }
 
     @Test
     fun testTimeTillNextExecutionAfterRegistration() {
-        val strategy = FixedRateExecutionStrategy(1000, initialDelay = 1000)
+        val strategy = FixedRateSchedulingStrategy(1000, initialDelay = 1000)
         val currentTime = Instant.now()
 
         Assertions.assertNull(strategy.timeTillNextExecution(Instant.now()))
@@ -29,7 +29,7 @@ class FixedRateExecutionStrategyTest {
 
     @Test
     fun testTimeTillNextExecutionAfterExecution() {
-        val strategy = FixedRateExecutionStrategy(1000)
+        val strategy = FixedRateSchedulingStrategy(1000)
         val currentTime = Instant.now()
 
         Assertions.assertNull(strategy.timeTillNextExecution(Instant.now()))
