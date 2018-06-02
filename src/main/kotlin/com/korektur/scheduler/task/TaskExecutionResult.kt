@@ -16,5 +16,5 @@ enum class TaskExecutionResult {
     /**
      * Task successfully competed, no further executions required, unschedule task
      */
-    FINISHED
+    FINISHED;
 }

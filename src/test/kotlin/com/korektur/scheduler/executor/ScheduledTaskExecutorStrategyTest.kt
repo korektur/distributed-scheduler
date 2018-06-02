@@ -24,22 +24,22 @@ class ScheduledTaskExecutorStrategyTest {
 
     @Test
     fun testExecuteNextSuccessfulExecution() {
-        val executor = ScheduledTaskExecutorStrategy(scheduledTask)
+        val executor = ScheduledTaskExecutorStrategy()
 
-        executor.execute()
+        executor.execute(scheduledTask)
 
         verify(scheduledTask, times(1)).execute()
     }
 
     @Test
     fun testExecuteNextFailedExecution() {
-        val executor = ScheduledTaskExecutorStrategy(scheduledTask)
+        val executor = ScheduledTaskExecutorStrategy()
         val errorHandlers = listOf<ErrorHandler>(mock(), mock())
         val exception = RuntimeException()
         whenever(scheduledTask.execute()) doThrow exception
         whenever(scheduledTask.errorHandlers) doReturn errorHandlers
 
-        executor.execute()
+        executor.execute(scheduledTask)
 
         verify(scheduledTask, times(1)).execute()
         errorHandlers.forEach { verify(it).handle(emptyMap(), exception) }
