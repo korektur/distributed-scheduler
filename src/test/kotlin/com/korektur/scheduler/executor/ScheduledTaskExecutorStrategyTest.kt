@@ -5,12 +5,11 @@ import com.korektur.scheduler.task.SharedScheduledTask
 import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.doThrow
 import com.nhaarman.mockito_kotlin.mock
-import com.nhaarman.mockito_kotlin.only
+import com.nhaarman.mockito_kotlin.times
 import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.whenever
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.Clock
 
 class ScheduledTaskExecutorStrategyTest {
 
@@ -19,7 +18,7 @@ class ScheduledTaskExecutorStrategyTest {
     @BeforeEach
     internal fun setUp() {
         scheduledTask = mock {
-            whenever(scheduledTask.context) doReturn emptyMap()
+            on { context } doReturn emptyMap()
         }
     }
 
@@ -29,7 +28,7 @@ class ScheduledTaskExecutorStrategyTest {
 
         executor.execute()
 
-        verify(scheduledTask, only()).execute()
+        verify(scheduledTask, times(1)).execute()
     }
 
     @Test
@@ -42,8 +41,7 @@ class ScheduledTaskExecutorStrategyTest {
 
         executor.execute()
 
-        verify(scheduledTask, only()).execute()
-        scheduledTask.
+        verify(scheduledTask, times(1)).execute()
         errorHandlers.forEach { verify(it).handle(emptyMap(), exception) }
     }
 }

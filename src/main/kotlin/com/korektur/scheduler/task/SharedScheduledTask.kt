@@ -9,12 +9,12 @@ import java.util.concurrent.ScheduledExecutorService
 
 public abstract class SharedScheduledTask(
         val name: String,
-        val strategy: SchedulingStrategy,
-        val context: Map<String, Any> = ConcurrentHashMap(),
+        open val strategy: SchedulingStrategy,
+        open val context: Map<String, Any> = ConcurrentHashMap(),
         val executorService: ExecutorService? = null) {
 
     private val _errorHandlers: MutableList<ErrorHandler> = ArrayList()
-    val errorHandlers: List<ErrorHandler>
+    open val errorHandlers: List<ErrorHandler>
         get() = unmodifiableList(_errorHandlers)
 
     public fun addErrorHandler(handler: ErrorHandler) {
