@@ -38,7 +38,6 @@ plugins {
 
 repositories {
     mavenCentral()
-    maven("http://repository.jetbrains.com/all")
 }
 
 kotlin { // configure<org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension>

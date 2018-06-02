@@ -12,13 +12,13 @@ import java.time.Clock
 import java.util.concurrent.Callable
 import kotlin.coroutines.experimental.CoroutineContext
 
-public class ScheduledTaskExecutorStrategy(private val sharedScheduledTask: SharedScheduledTask) {
+public open class ScheduledTaskExecutorStrategy {
 
     companion object {
         private val LOG = LoggerFactory.getLogger(ScheduledTaskExecutorStrategy::class.java)
     }
 
-    public fun execute(): TaskExecutionResult {
+    public fun execute(sharedScheduledTask: SharedScheduledTask): TaskExecutionResult {
         try {
             if (LOG.isDebugEnabled) {
                 LOG.debug("executing scheduledTask: ${sharedScheduledTask.name}")
