@@ -61,7 +61,7 @@ class TaskSchedulerTest {
 
         taskScheduler.addTask(task)
 
-        assertTrue(awaitLatch.await(1000, TimeUnit.MILLISECONDS))
+        assertTrue(awaitLatch.await(10000, TimeUnit.MILLISECONDS))
         verify(strategy, times(1)).register(timestampRegister)
         verify(strategy, times(1)).beforeExecution(timestampBeforeExecution)
         verify(strategy, never()).afterExecution(any())
