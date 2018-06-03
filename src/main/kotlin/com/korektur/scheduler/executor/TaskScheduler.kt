@@ -8,11 +8,13 @@ import com.korektur.scheduler.task.TaskExecutionResult.COMPLETE
 import com.korektur.scheduler.task.TaskExecutionResult.FAILED
 import com.korektur.scheduler.task.TaskExecutionResult.FINISHED
 import com.korektur.scheduler.task.TaskExecutionResult.RETRY
+import kotlinx.coroutines.experimental.DefaultDispatcher
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.cancelAndJoin
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.newCoroutineContext
 import kotlinx.coroutines.experimental.runBlocking
 import java.time.Clock
 import java.util.concurrent.Callable
@@ -22,20 +24,23 @@ import java.util.concurrent.PriorityBlockingQueue
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import java.util.function.Supplier
+import kotlin.coroutines.experimental.CoroutineContext
 
+//TODO: add logging
 class TaskScheduler(private val clock: Clock,
                     private val executorStrategy: ScheduledTaskExecutorStrategy = ScheduledTaskExecutorStrategy()) {
 
-
-    private val taskQueue = PriorityBlockingQueue<SharedScheduledTask>()
+    private val taskQueue = PriorityBlockingQueue<SharedScheduledTask>(11, this::taskComparator)
 
     private lateinit var workerThread: Job
 
     public fun init() {
         workerThread = launch {
-            while (true) {
-                val nextTask = taskQueue.take()
-                schedule(nextTask)
+            while (isActive) {
+                val nextTask = taskQueue.poll(100, TimeUnit.MILLISECONDS)
+                if (nextTask != null) {
+                    async { schedule(nextTask) }
+                }
                 //TODO: handle errors in scheduled tasks
             }
         }
@@ -47,12 +52,21 @@ class TaskScheduler(private val clock: Clock,
         }
     }
 
-    private fun schedule(task: SharedScheduledTask) {
+    public fun addTask(task: SharedScheduledTask) {
+        taskQueue.add(task)
+    }
+
+    private suspend fun schedule(task: SharedScheduledTask) {
         val schedulingStrategy = task.strategy
         task.strategy.register(clock.instant())
         if (task.executorService == null && COROUTINES_ENABLED) {
             async {
-                delay(task.strategy.timeTillNextExecution(clock.instant())!!)
+                var timeLeft = task.strategy.timeTillNextExecution(clock.instant())!!
+                while(timeLeft > 0) {
+                    delay(timeLeft)
+                    timeLeft = task.strategy.timeTillNextExecution(clock.instant())!!
+                }
+
                 task.strategy.beforeExecution(clock.instant())
                 val result = executorStrategy.execute(task)
                 schedulingStrategy.afterExecution(clock.instant())
@@ -81,19 +95,30 @@ class TaskScheduler(private val clock: Clock,
         }
     }
 
+    private fun taskComparator(first: SharedScheduledTask, second: SharedScheduledTask): Int {
+        val currentTime = clock.instant()
+        //comparing by time is ok since its linear and the result of comparison between two tasks will always be the same.
+        return first.strategy.timeTillNextExecution(currentTime)!!.compareTo(
+                second.strategy.timeTillNextExecution(currentTime)!!)
+    }
+
     private fun taskWrapper(task: SharedScheduledTask): Supplier<TaskExecutionResult> {
         return Supplier {
-            Thread.sleep(task.strategy.timeTillNextExecution(clock.instant())!!)
+            var timeLeft = task.strategy.timeTillNextExecution(clock.instant())!!
+            while(timeLeft > 0) {
+                Thread.sleep(timeLeft)
+                timeLeft = task.strategy.timeTillNextExecution(clock.instant())!!
+            }
 
             task.strategy.beforeExecution(clock.instant())
-            executorStrategy.execute(task)
+            runBlocking { executorStrategy.execute(task) }
         }
     }
 
     private fun schedulerTaskWrapper(task: SharedScheduledTask): Callable<TaskExecutionResult> {
         return Callable {
             task.strategy.beforeExecution(clock.instant())
-            executorStrategy.execute(task)
+            runBlocking { executorStrategy.execute(task) }
         }
     }
 

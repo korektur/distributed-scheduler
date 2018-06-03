@@ -8,6 +8,7 @@ import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.times
 import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.whenever
+import kotlinx.coroutines.experimental.runBlocking
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -26,7 +27,7 @@ class ScheduledTaskExecutorStrategyTest {
     fun testExecuteNextSuccessfulExecution() {
         val executor = ScheduledTaskExecutorStrategy()
 
-        executor.execute(scheduledTask)
+        runBlocking { executor.execute(scheduledTask) }
 
         verify(scheduledTask, times(1)).execute()
     }
@@ -39,7 +40,7 @@ class ScheduledTaskExecutorStrategyTest {
         whenever(scheduledTask.execute()) doThrow exception
         whenever(scheduledTask.errorHandlers) doReturn errorHandlers
 
-        executor.execute(scheduledTask)
+        runBlocking { executor.execute(scheduledTask) }
 
         verify(scheduledTask, times(1)).execute()
         errorHandlers.forEach { verify(it).handle(emptyMap(), exception) }
