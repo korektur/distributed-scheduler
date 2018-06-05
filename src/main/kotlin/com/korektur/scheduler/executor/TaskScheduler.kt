@@ -16,6 +16,7 @@ import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.newCoroutineContext
 import kotlinx.coroutines.experimental.runBlocking
+import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.util.concurrent.Callable
 import java.util.concurrent.CompletableFuture
@@ -26,15 +27,23 @@ import java.util.concurrent.TimeUnit
 import java.util.function.Supplier
 import kotlin.coroutines.experimental.CoroutineContext
 
-//TODO: add logging
 class TaskScheduler(private val clock: Clock,
                     private val executorStrategy: ScheduledTaskExecutorStrategy = ScheduledTaskExecutorStrategy()) {
+
+    companion object {
+        @JvmStatic
+        private val LOG = LoggerFactory.getLogger(TaskScheduler::class.java)
+    }
 
     private val taskQueue = PriorityBlockingQueue<SharedScheduledTask>(11, this::taskComparator)
 
     private lateinit var workerThread: Job
 
     public fun init() {
+        if (LOG.isDebugEnabled) {
+            LOG.debug("initializing task consumer thread for scheduler")
+        }
+
         workerThread = launch {
             while (isActive) {
                 val nextTask = taskQueue.poll(100, TimeUnit.MILLISECONDS)
@@ -47,6 +56,10 @@ class TaskScheduler(private val clock: Clock,
     }
 
     public fun stop() {
+        if (LOG.isDebugEnabled) {
+            LOG.debug("stopping task consumer")
+        }
+
         runBlocking {
             workerThread.cancelAndJoin()
         }
@@ -60,9 +73,13 @@ class TaskScheduler(private val clock: Clock,
         val schedulingStrategy = task.strategy
         task.strategy.register(clock.instant())
         if (task.executorService == null && COROUTINES_ENABLED) {
+            if (LOG.isDebugEnabled) {
+                LOG.debug("scheduling task with name ${task.name} using coroutine execution strategy")
+            }
+
             async {
                 var timeLeft = task.strategy.timeTillNextExecution(clock.instant())!!
-                while(timeLeft > 0) {
+                while (timeLeft > 0) {
                     delay(timeLeft)
                     timeLeft = task.strategy.timeTillNextExecution(clock.instant())!!
                 }
@@ -105,7 +122,7 @@ class TaskScheduler(private val clock: Clock,
     private fun taskWrapper(task: SharedScheduledTask): Supplier<TaskExecutionResult> {
         return Supplier {
             var timeLeft = task.strategy.timeTillNextExecution(clock.instant())!!
-            while(timeLeft > 0) {
+            while (timeLeft > 0) {
                 Thread.sleep(timeLeft)
                 timeLeft = task.strategy.timeTillNextExecution(clock.instant())!!
             }
