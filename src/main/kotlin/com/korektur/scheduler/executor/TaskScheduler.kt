@@ -128,14 +128,14 @@ class TaskScheduler(private val clock: Clock,
             }
 
             task.strategy.beforeExecution(clock.instant())
-            runBlocking { executorStrategy.execute(task) }
+            executorStrategy.execute(task)
         }
     }
 
     private fun schedulerTaskWrapper(task: SharedScheduledTask): Callable<TaskExecutionResult> {
         return Callable {
             task.strategy.beforeExecution(clock.instant())
-            runBlocking { executorStrategy.execute(task) }
+            executorStrategy.execute(task)
         }
     }
 

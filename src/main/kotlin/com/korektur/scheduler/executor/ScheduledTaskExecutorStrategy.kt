@@ -18,7 +18,7 @@ public open class ScheduledTaskExecutorStrategy {
         private val LOG = LoggerFactory.getLogger(ScheduledTaskExecutorStrategy::class.java)
     }
 
-    public suspend fun execute(sharedScheduledTask: SharedScheduledTask): TaskExecutionResult {
+    public fun execute(sharedScheduledTask: SharedScheduledTask): TaskExecutionResult {
         try {
             if (LOG.isDebugEnabled) {
                 LOG.debug("executing scheduledTask: ${sharedScheduledTask.name}")
