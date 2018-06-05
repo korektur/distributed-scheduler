@@ -40,7 +40,8 @@ repositories {
     mavenCentral()
 }
 
-kotlin { // configure<org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension>
+kotlin {
+    // configure<org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension>
     experimental.coroutines = Coroutines.ENABLE
 }
 
@@ -53,7 +54,7 @@ dependencies {
     testCompile("org.junit.jupiter", "junit-jupiter-api", junitVersion)
     testCompile("org.junit.jupiter", "junit-jupiter-params", junitVersion)
     testCompile("org.mockito", "mockito-core", mockitoVersion)
-    testCompile("com.nhaarman","mockito-kotlin" ,mockitoKotlinVersion)
+    testCompile("com.nhaarman", "mockito-kotlin", mockitoKotlinVersion)
 
     testRuntime("org.junit.jupiter", "junit-jupiter-engine", junitVersion)
 }
@@ -67,6 +68,8 @@ tasks.withType<Test> {
     testLogging {
         events("passed", "skipped", "failed")
     }
+
+    testLogging.showStandardStreams = true
 }
 
 tasks.withType<KotlinCompile> {
