@@ -32,7 +32,7 @@ class TaskSchedulerTest {
     private lateinit var taskScheduler: TaskScheduler
 
     @BeforeEach
-    internal fun setUp() {
+    fun setUp() {
         clock = mock()
         whenever(clock.instant()).thenReturn(timestampRegister, timestampBeforeExecution)
 
@@ -41,12 +41,12 @@ class TaskSchedulerTest {
     }
 
     @AfterEach
-    internal fun tearDown() {
+    fun tearDown() {
         taskScheduler.stop()
     }
 
     @Test
-    internal fun testAddSimpleTaskWithoutExecutor() {
+    fun testAddSimpleTaskWithoutExecutor() {
         val strategy = spy(FixedDelaySchedulingStrategy(100, initialDelay = 200))
         val latch = CountDownLatch(1)
         val awaitLatch = CountDownLatch(1)
