@@ -1,5 +1,6 @@
 package com.korektur.scheduler.executor
 
+import com.korektur.scheduler.lock.DummyTaskExecutionLock
 import com.korektur.scheduler.strategy.FixedDelaySchedulingStrategy
 import com.korektur.scheduler.task.SharedScheduledTask
 import com.korektur.scheduler.task.TaskExecutionResult
@@ -50,7 +51,7 @@ class TaskSchedulerTest {
         val strategy = spy(FixedDelaySchedulingStrategy(100, initialDelay = 200))
         val latch = CountDownLatch(1)
         val awaitLatch = CountDownLatch(1)
-        val task = object : SharedScheduledTask("test", strategy) {
+        val task = object : SharedScheduledTask("test", strategy, DummyTaskExecutionLock()) {
             override fun execute(): TaskExecutionResult {
                 awaitLatch.countDown()
                 latch.await()

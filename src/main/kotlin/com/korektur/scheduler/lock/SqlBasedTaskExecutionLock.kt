@@ -3,12 +3,13 @@ package com.korektur.scheduler.lock
 import org.slf4j.LoggerFactory
 import javax.sql.DataSource
 import org.apache.commons.dbutils.QueryRunner
+import org.intellij.lang.annotations.Language
 
 //TODO: check with both autocommit = false/true
 abstract class SqlBasedTaskExecutionLock(capacity: Int,
                                          protected val tableName: String,
                                          dataSource: DataSource,
-                                         protected val validationQuery: String) : BaseTaskExecutionLock(capacity) {
+                                         @Language("SQL") protected val validationQuery: String) : BaseTaskExecutionLock(capacity) {
 
     companion object {
         @JvmStatic
@@ -18,6 +19,7 @@ abstract class SqlBasedTaskExecutionLock(capacity: Int,
     private val run = QueryRunner(dataSource)
 
     protected abstract fun initializationQuery(): String
+    protected abstract fun lockQuery(): String
 
     //TODO: where and when to call this?
     open fun initialize() {
@@ -25,7 +27,7 @@ abstract class SqlBasedTaskExecutionLock(capacity: Int,
 
         val initializationQuery = initializationQuery()
 
-        if (!initializationQuery.isBlank()) {
+        if (initializationQuery.isBlank()) {
             LOG.info("initialization query is empty, skipping initialization")
             return
         }
@@ -46,6 +48,7 @@ abstract class SqlBasedTaskExecutionLock(capacity: Int,
     }
 
     override fun tryLockInternal(): Boolean {
+
         return false
     }
 
